@@ -15,6 +15,8 @@
 #' es <- BiocSet:::.tbl_elementset(set1 = letters, set2 = LETTERS)
 .tbl_elementset <- function(...) {
     args <- list(...)
+    if (length(args) == 1L && is(args[[1]], "list"))
+        args <- args[[1]]
 
     stopifnot(
         all(vapply(args, is, logical(1), "character")),

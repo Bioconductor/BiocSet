@@ -23,6 +23,17 @@ test_that("'.tbl_elementset()' works", {
     expect_error(.tbl_elementset(a = letters, LETTERS))
 })
 
+test_that("'.tbl_elementset()' list() and named character vectors work", {
+    es <- .tbl_elementset(list())
+    expect_identical(es, .tbl_elementset())
+
+    es <- .tbl_elementset(list(a = letters))
+    expect_identical(es, .tbl_elementset(a = letters))
+
+    es <- .tbl_elementset(list(a = letters, b = LETTERS))
+    expect_identical(es, .tbl_elementset(a = letters, b = LETTERS))
+})
+
 test_that("'.is_tbl_elementset()' works", {
     expect_true(.is_tbl_elementset(tibble(element = character(),
                                          set = character())))
