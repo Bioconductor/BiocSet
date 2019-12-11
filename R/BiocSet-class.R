@@ -24,20 +24,23 @@ NULL
 )
 
 ## Constructor
-#' @description The \code{BiocSet} constructor, the show method, the slot 
-#'     accessors, and creating a \code{BiocSet} object from an element set 
-#'     tibble rather than character vector(s).
+#' @description The \code{BiocSet} constructor, the show method, the
+#'     slot accessors, and creating a \code{BiocSet} object from an
+#'     element set tibble rather than character vector(s).
 #' @rdname BiocSet-class
-#' @param ... Named character() vectors of element sets. Each character vector 
-#'     is an element set. The name of the character vectors are the name of the 
-#'     sets.
-#' @param active A character to indicate which tibble is active. The default is
-#'     "elementset".
-#' @return An S4 \code{BiocSet} object shown as a tripple tibble, where each 
-#'     slot is a tibble.
+#' @param ... Named character() vectors of element sets, or a named
+#'     list of character() vectors.. Each character vector is an
+#'     element set. The name of the character vectors are the name of
+#'     the sets.
+#' @param active A character to indicate which tibble is active. The
+#'     default is "elementset".
+#' @return An S4 \code{BiocSet} object shown as a tripple tibble,
+#'     where each slot is a tibble.
 #' @export
 #' @examples
 #' BiocSet(set1 = letters, set2 = LETTERS)
+#' lst <- list(set1 = letters, set2 = LETTERS)
+#' BiocSet(lst)
 BiocSet <- function(..., active = c("elementset", "element", "set"))
 {
     active <- match.arg(active)
