@@ -100,7 +100,7 @@ test_that("'arrange.BiocSet()' works", {
 
     es2 <- es %>% arrange(element)
     expect_true(.is_tbl_elementset(es_elementset(es2)))
-    expect_equal(es2, es)
+    expect_equal(es_element(es2)$element, es_element(es)$element)
     expect_equal(es_elementset(es2)$element, sort(es_elementset(es)$element))
 
     es3 <- es %>% arrange(set)

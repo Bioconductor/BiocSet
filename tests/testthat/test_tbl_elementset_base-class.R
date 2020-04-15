@@ -116,19 +116,23 @@ test_that("'summarise.tbl_elementset_base()' works", {
     expect_s3_class(es1, "tbl_elementset")
     expect_identical(class(es1), c("tbl_elementset", tbl))
     expect_length(class(es1), 5)
-    expect_error(es %>% select(set) %>% summarise(set))
+    es1_2 <- es %>% select(set) %>% summarise(set)
+    expect_identical(es1_2$set, es$set)
 
     es2 <- .tbl_element(es) %>% select(element) %>% summarise(n = n())
     expect_s3_class(es2,"tbl_element")
     expect_identical(class(es2), c("tbl_element", tbl))
     expect_length(class(es2), 5)
-    expect_error(es %>% select(element) %>% summarise(element))
+    es2_2 <- es %>% select(element) %>% summarise(element)
+    expect_identical(es2_2$element, es$element)
 
     es3 <- .tbl_set(es) %>% select(set) %>% summarise(n = n())
     expect_s3_class(es3, "tbl_set")
     expect_identical(class(es3), c("tbl_set", tbl))
     expect_length(class(es3), 5)
-    expect_error(es %>% select(set) %>% summarise(set))
+
+    es4 <- es %>% select(set) %>% summarise()
+    expect_identical(dim(es4), c(1L, 0L))
 })
 
 test_that("'arrange.tbl_elementset_base()' works", {
