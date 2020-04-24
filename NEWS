@@ -3,6 +3,7 @@ CHANGES IN VERSION 1.1
 
 BUG FIX
 
+    o (1.1.4) Fix tests for release
     o (1.1.3) Update dplyr functions in preparation for dplyr 1.0.0 release.
     o (1.1.1) Fix tests that test the length of org objects.
 
