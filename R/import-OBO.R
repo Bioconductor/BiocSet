@@ -2,24 +2,24 @@ check_ancestry <- function(object) {
     errors <- character()
 
     if (!("children" %in% names(.set(object)))) {
-        msg <- paste("children needs to be included in the obo file.")
+        msg <- "'children' needs to be included in the obo file."
         errors <- c(errors, msg)
     }
 
-    if (!("parent" %in% names(.set(object)))) {
-        msg <- paste("parent needs to be included in the obo file.")
+    if (!("parents" %in% names(.set(object)))) {
+        msg <- "'parents' needs to be included in the obo file."
         errors <- c(errors, msg)
     }
 
-    if (!("ancestor" %in% names(.set(object)))) {
-        msg <- paste("ancestor needs to be included in the obo file.")
+    if (!("ancestors" %in% names(.set(object)))) {
+        msg <- "'ancestors' needs to be included in the obo file."
         errors <- c(errors, msg)
     }
 
     if (length(errors) == 0) TRUE else errors
 }
 
-setClass("OboSet", contains = "BiocSet", validity = check_ancestry)
+.OBOSet <- setClass("OBOSet", contains = "BiocSet", validity = check_ancestry)
 
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
@@ -58,29 +58,53 @@ import.obo <- function(path) {
         myunnest
 
     oboset <- BiocSet_from_elementset(elementsets, elements, sets)
-    oboset
+    .OBOSet(oboset)
 }
 
-element_children <- function(biocset_obo) {
-    biocset_obo %>% es_element() %>% select(c("element", "children"))
+oboset_element_children <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_element() %>%
+        select(c("element", "children"))
+        unnest("children")
 }
 
-element_parents <- function(biocset_obo) {
-    biocset_obo %>% es_element() %>% select(c("element", "parents"))
+element_parents <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_element() %>%
+        select(c("element", "parents"))
+        unnest("parents")
 }
 
-element_ancestors <- function(biocset_obo) {
-    biocset_obo %>% es_element() %>% select(c("element", "ancestors"))
+element_ancestors <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_element() %>%
+        select(c("element", "ancestors"))
+        unnest("ancestors")
 }
 
-set_children <- function(biocset_obo) {
-    biocset_obo %>% es_set() %>% select(c("set", "children"))
+set_children <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_set() %>%
+        select(c("set", "children"))
+        unnest("children")
 }
 
-set_parents <- function(biocset_obo) {
-    biocset_obo %>% es_set() %>% select(c("set", "parents"))
+set_parents <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_set() %>%
+        select(c("set", "parents")) %>%
+        unnest("parents")
 }
 
-set_ancestors <- function(biocset_obo) {
-    biocset_obo %>% es_set() %>% select(c("set", "ancestors"))
+set_ancestors <- function(oboset) {
+    stopifnot(is(oboset, "OBOSet"))
+    oboset %>%
+        es_set() %>%
+        select(c("set", "ancestors")) %>%
+        unnest("ancestors")
 }
