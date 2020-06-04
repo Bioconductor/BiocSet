@@ -251,7 +251,7 @@ test_that("'map_multiple()' works",
 
     expect_error(map_multiple(es, org.Hs.eg.db, "SYMBOL", "ENSEMBL", "first"))
     expect_error(map_multiple(es, org.Hs.eg.db, "ENSEMBL", "SYMBOL", "list"))
-    expect_error(map_multiple(es, org.Hs.eg.db, "SYMBOL", "ENSEMBL", filter))
+    expect_error(map_multiple(es, org.Hs.eg.db, "SYMBOL", "ENSEMBL", filter()))
     expect_error(map_multiple(es, org.Hs.eg.db))
 })
 
