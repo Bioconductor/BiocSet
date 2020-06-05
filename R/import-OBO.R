@@ -24,18 +24,21 @@ check_ancestry <- function(object) {
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
 #' @importFrom plyr rename
-import.obo <- function(path) {
-    ## should there be an argument to indicate if 
-    ## everything should be extracted or just the minimal one
-    obo <- get_ontology(path, extract_tags = "everything")
-    minimal <- get_ontology(path)
-
-    elements <- 
-        as_tibble(lapply(obo, as.vector)) %>%
-        filter(!namespace %in% "external") %>%
-        rename(element = id)
-
-    elements_minimal <- as_tibble(lapply(minimal, as.vector))
+#' @examples 
+#' oboFile <- system.file(package = "BiocSet", "extdata", "sample_go.obo")
+#' tst_obo <- import(oboFile)
+import.obo <- function(path, extract_tags = "minimal") {
+    stopifnot(extract_tags %in% c("minimal", "everything"))
+    if (extract_tags == "everything") {
+        obo <- get_ontology(path, extract_tags = "everything")
+        elements <- as_tibble(lapply(obo, as.vector)) %>%
+            filter(!namespace %in% "external") %>%
+            rename(element = id)
+    } else {
+        obo <- get_ontology(path)
+        elements <- as_tibble(lapply(obo, as.vector)) %>%
+            rename(element = id)
+    }
 
     sets <- 
         elements %>%
@@ -61,39 +64,40 @@ import.obo <- function(path) {
     .OBOSet(oboset)
 }
 
+#' @importFrom tidyr unnest
 oboset_element_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_element() %>%
-        select(c("element", "children"))
+        select(c("element", "children")) %>%
         unnest("children")
 }
 
-element_parents <- function(oboset) {
+oboset_element_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_element() %>%
-        select(c("element", "parents"))
+        select(c("element", "parents")) %>%
         unnest("parents")
 }
 
-element_ancestors <- function(oboset) {
+oboset_element_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_element() %>%
-        select(c("element", "ancestors"))
+        select(c("element", "ancestors")) %>%
         unnest("ancestors")
 }
 
-set_children <- function(oboset) {
+oboset_set_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_set() %>%
-        select(c("set", "children"))
+        select(c("set", "children")) %>%
         unnest("children")
 }
 
-set_parents <- function(oboset) {
+oboset_set_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_set() %>%
@@ -101,7 +105,7 @@ set_parents <- function(oboset) {
         unnest("parents")
 }
 
-set_ancestors <- function(oboset) {
+oboset_set_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
         es_set() %>%

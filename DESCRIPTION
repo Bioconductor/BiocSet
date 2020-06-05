@@ -21,7 +21,10 @@ Imports: methods,
     plyr, 
     rtracklayer, 
     AnnotationDbi,
-    KEGGREST
+    KEGGREST,
+    ontologyIndex,
+    plyr,
+    tidyr
 Suggests:
     GSEABase,
     airway,
