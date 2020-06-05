@@ -33,12 +33,13 @@ es_elementset(x)
 BiocSet_from_elementset(elementset, element, set)
 }
 \arguments{
-\item{...}{Named character() vectors of element sets. Each character vector 
-is an element set. The name of the character vectors are the name of the 
-sets.}
+\item{...}{Named character() vectors of element sets, or a named
+list of character() vectors.. Each character vector is an
+element set. The name of the character vectors are the name of
+the sets.}
 
-\item{active}{A character to indicate which tibble is active. The default is
-"elementset".}
+\item{active}{A character to indicate which tibble is active. The
+default is "elementset".}
 
 \item{object}{A \code{BiocSet} object.}
 
@@ -51,15 +52,15 @@ sets.}
 \item{set}{A tibble with set information.}
 }
 \value{
-An S4 \code{BiocSet} object shown as a tripple tibble, where each 
-    slot is a tibble.
+An S4 \code{BiocSet} object shown as a tripple tibble,
+    where each slot is a tibble.
 }
 \description{
 character()
 
-The \code{BiocSet} constructor, the show method, the slot 
-    accessors, and creating a \code{BiocSet} object from an element set 
-    tibble rather than character vector(s).
+The \code{BiocSet} constructor, the show method, the
+    slot accessors, and creating a \code{BiocSet} object from an
+    element set tibble rather than character vector(s).
 }
 \section{Slots}{
 
@@ -75,6 +76,8 @@ The \code{BiocSet} constructor, the show method, the slot
 
 \examples{
 BiocSet(set1 = letters, set2 = LETTERS)
+lst <- list(set1 = letters, set2 = LETTERS)
+BiocSet(lst)
 
 set.seed(123)
 element <-

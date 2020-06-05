@@ -21,12 +21,14 @@ check_ancestry <- function(object) {
 
 .OBOSet <- setClass("OBOSet", contains = "BiocSet", validity = check_ancestry)
 
+.OBOFile = setClass("OBOFile", contains = "RTLFile")
+
+OBOFile = function(resource, ...)
+    .OBOFile(resource = resource)
+
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
-#' @importFrom plyr rename
-#' @examples 
-#' oboFile <- system.file(package = "BiocSet", "extdata", "sample_go.obo")
-#' tst_obo <- import(oboFile)
+#' @importFrom dplyr rename
 import.obo <- function(path, extract_tags = "minimal") {
     stopifnot(extract_tags %in% c("minimal", "everything"))
     if (extract_tags == "everything") {
@@ -63,6 +65,22 @@ import.obo <- function(path, extract_tags = "minimal") {
     oboset <- BiocSet_from_elementset(elementsets, elements, sets)
     .OBOSet(oboset)
 }
+
+#' @rdname import
+#' @param extract_tags For \code{import} of obo files, a character value that is
+#'     is either "minimal" or "everything". This argument determines if all 
+#'     all properties are extracted from the file or just the terms required to 
+#'     run the OBOSet related functions. Default is "minimal".
+#' @export
+#' @examples
+#'
+#' oboFile <- system.file(package = "BiocSet", "extdata", "sample_go.obo")
+#' tst_obo <- import(oboFile)
+setMethod("import", c("OBOFile", "ANY", "ANY"),
+    function(con, format, text, ...)
+{
+    import.obo(resource(con))
+})
 
 #' @importFrom tidyr unnest
 oboset_element_children <- function(oboset) {
