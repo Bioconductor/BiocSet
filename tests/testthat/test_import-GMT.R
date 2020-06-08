@@ -1,4 +1,4 @@
-context("import-class")
+context("import-GMT")
 
 test_that("'import.gmt()' works", {
     gmtFile <- system.file(package = "BiocSet", "extdata",

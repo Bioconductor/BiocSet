@@ -91,6 +91,18 @@ gmt <- export(tbl2, fl)
 gmt
 ```
 
+We also support importing obo files to create an `OBOSet` object which extends 
+the `BiocSet` class. The default only displays the most basic amount of columns 
+needed to perform certain tasks, but the argument `extract_tag = everything` 
+allows for additional columns to be imported as well.
+
+```{r obo}
+oboFile <- system.file(package = "BiocSet",
+                        "extdata",
+                        "sample_go.obo")
+obo <- import(oboFile)
+obo
+```
 ## Implemented functions
 
 A feature available to `BiocSet` is the ability to activate different 

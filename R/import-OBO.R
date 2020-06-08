@@ -79,7 +79,7 @@ import.obo <- function(path, extract_tags = "minimal") {
 setMethod("import", c("OBOFile", "ANY", "ANY"),
     function(con, format, text, ...)
 {
-    import.obo(resource(con))
+    import.obo(resource(con), ...)
 })
 
 #' @importFrom tidyr unnest
