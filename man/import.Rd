@@ -27,11 +27,6 @@ the element set that should be imported.}
 \item{...}{Parameters to pass to the format-specific method}
 
 \item{object}{For `export()`, the object to be exported.}
-
-\item{extract_tags}{For \code{import} of obo files, a character value that is
-is either "minimal" or "everything". This argument determines if all 
-all properties are extracted from the file or just the terms required to 
-run the OBOSet related functions. Default is "minimal".}
 }
 \value{
 For `import()`, a BiocSet object

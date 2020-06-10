@@ -30,6 +30,7 @@ OBOFile = function(resource, ...)
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr rename
 import.obo <- function(path, extract_tags = "minimal") {
+    namespace <- id <- element <- NULL
     stopifnot(extract_tags %in% c("minimal", "everything"))
     if (extract_tags == "everything") {
         obo <- get_ontology(path, extract_tags = "everything")
@@ -42,6 +43,7 @@ import.obo <- function(path, extract_tags = "minimal") {
             rename(element = id)
     }
 
+    children <- name <- parents <- ancestors <- set <- NULL
     sets <- 
         elements %>%
         filter(lengths(children) > 0) %>%
@@ -67,10 +69,6 @@ import.obo <- function(path, extract_tags = "minimal") {
 }
 
 #' @rdname import
-#' @param extract_tags For \code{import} of obo files, a character value that is
-#'     is either "minimal" or "everything". This argument determines if all 
-#'     all properties are extracted from the file or just the terms required to 
-#'     run the OBOSet related functions. Default is "minimal".
 #' @export
 #' @examples
 #'
