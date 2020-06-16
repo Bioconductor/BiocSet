@@ -128,3 +128,56 @@ oboset_set_ancestors <- function(oboset) {
         select(c("set", "ancestors")) %>%
         unnest("ancestors")
 }
+
+export.BiocSet_to_obo <- function(tbl, path = tempfile(fileext = ".obo")) {
+    stopifnot(.is_tbl_elementset(es_elementset(tbl)))
+    
+    elements <- es_element(tbl)
+    ## better to use colnames() or names()?
+    if (!"id" %in% names(elements))
+        names(elements) <- sub("element", "id", names(elements))
+
+    if (!"is_a" %in% names(elements))
+        names(elements) <- sub("parents", "is_a", names(elements))
+
+    if ("obsolete" %in% names(elements) & is.logical(elements$obsolete)) {
+        names(elements) <- sub("obsolete", "is_obsolete", names(elements))
+        elements$is_obsolete <- as.numeric(elements$is_obsolete)
+    }
+
+    term_tags <- c("id", "is_anonymous", "name", "namespace", "alt_id", "def", 
+        "comment", "subset", "synonym", "xref", "builtin", "property_value", 
+        "is_a", "intersection_of", "union_of", "equivalent_to", "disjoint_from", 
+        "relationship", "created_by", "creation_date", "is_obsolete", 
+        "replaced_by", "consider")
+
+    sub_elements <- elements[,names(elements) %in% term_tags]
+     
+    #titles <- names(sub_elements)
+    subjects <- sub_elements$id
+
+    terms <- lapply(seq_along(subjects), function(x) {
+        less_elements <- sub_elements[x, which(!is.na(sub_elements[x,]))]
+        titles <- names(less_elements)
+        lens <- sapply(seq_along(titles), function(y) {
+            lengths(less_elements[, y][[1]])
+        })
+        expand_titles <- rep(titles, lens)
+        paste0("\n[Terms]\n", expand_titles, ": ", unlist(less_elements))
+    })
+
+}
+
+#' @rdname import
+#' @export
+#' 
+#' fl <- system.file("extdata", "sample_go.obo", package = "BiocSet")
+#' tbl <- import(fl)
+#' new_fl <- tempfile(fileext = ".obo")
+#' obo <- export(tbl, new_fl)
+setMethod(
+    "export", c("BiocSet", "OBOFile", "ANY"),
+    function(object, con, format, ...)
+{
+    export.BiocSet_to_obo(object, resource(con))
+})
