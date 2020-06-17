@@ -142,7 +142,7 @@ export.BiocSet_to_obo <- function(tbl, path = tempfile(fileext = ".obo")) {
 
     if ("obsolete" %in% names(elements) & is.logical(elements$obsolete)) {
         names(elements) <- sub("obsolete", "is_obsolete", names(elements))
-        elements$is_obsolete <- as.numeric(elements$is_obsolete)
+        elements$is_obsolete <- as.integer(elements$is_obsolete)
     }
 
     term_tags <- c("id", "is_anonymous", "name", "namespace", "alt_id", "def", 
@@ -153,7 +153,6 @@ export.BiocSet_to_obo <- function(tbl, path = tempfile(fileext = ".obo")) {
 
     sub_elements <- elements[,names(elements) %in% term_tags]
      
-    #titles <- names(sub_elements)
     subjects <- sub_elements$id
 
     terms <- lapply(seq_along(subjects), function(x) {
@@ -163,9 +162,15 @@ export.BiocSet_to_obo <- function(tbl, path = tempfile(fileext = ".obo")) {
             lengths(less_elements[, y][[1]])
         })
         expand_titles <- rep(titles, lens)
-        paste0("\n[Terms]\n", expand_titles, ": ", unlist(less_elements))
+        paste0(expand_titles, ": ", unlist(less_elements))
+        # how can I arrange the "list" items to reflect term_tags?
     })
+    
+    names(terms) <- rep("\n[Term]\n", length(terms))
+    #colnames(terms) <- rep("\n[Term]\n", dim(terms)[2])
 
+    ## can't writeLines lists, just character objects
+    writeLines(terms, path)
 }
 
 #' @rdname import
