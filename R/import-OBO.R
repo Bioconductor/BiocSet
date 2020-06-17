@@ -29,7 +29,7 @@ OBOFile = function(resource, ...)
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr rename
-import.obo <- function(path, extract_tags = "minimal") {
+.import_obo <- function(path, extract_tags = "minimal") {
     namespace <- id <- element <- NULL
     stopifnot(extract_tags %in% c("minimal", "everything"))
     if (extract_tags == "everything") {
@@ -65,7 +65,7 @@ import.obo <- function(path, extract_tags = "minimal") {
         myunnest
 
     oboset <- BiocSet_from_elementset(elementsets, elements, sets)
-    .OBOSet(oboset)
+    .OBOSet(oboset, metadata = list(obo_header = attr(obo, "version")))
 }
 
 #' @rdname import
@@ -77,7 +77,7 @@ import.obo <- function(path, extract_tags = "minimal") {
 setMethod("import", c("OBOFile", "ANY", "ANY"),
     function(con, format, text, ...)
 {
-    import.obo(resource(con), ...)
+    .import_obo(resource(con), ...)
 })
 
 #' @importFrom tidyr unnest
@@ -129,60 +129,79 @@ oboset_set_ancestors <- function(oboset) {
         unnest("ancestors")
 }
 
-export.BiocSet_to_obo <- function(tbl, path = tempfile(fileext = ".obo")) {
-    stopifnot(.is_tbl_elementset(es_elementset(tbl)))
+.export_obo <- function(tbl, path) {
+    stopifnot(
+        .is_tbl_elementset(es_elementset(tbl)),
+        `'path' exists` = !file.exists(path)
+    )
     
     elements <- es_element(tbl)
     ## better to use colnames() or names()?
     if (!"id" %in% names(elements))
-        names(elements) <- sub("element", "id", names(elements))
+        elements <- elements %>% rename(id = "element")
 
     if (!"is_a" %in% names(elements))
-        names(elements) <- sub("parents", "is_a", names(elements))
+        elements <- elements %>% rename(is_a = "parents")
 
     if ("obsolete" %in% names(elements) & is.logical(elements$obsolete)) {
-        names(elements) <- sub("obsolete", "is_obsolete", names(elements))
-        elements$is_obsolete <- as.integer(elements$is_obsolete)
+        elements <-
+            elements %>%
+            rename(is_obsolete = "obsolete") %>%
+            mutate(is_obsolete = as.integer(.data$is_obsolete))
     }
 
-    term_tags <- c("id", "is_anonymous", "name", "namespace", "alt_id", "def", 
+    term_tags <- c(
+        "id", "is_anonymous", "name", "namespace", "alt_id", "def",
         "comment", "subset", "synonym", "xref", "builtin", "property_value", 
         "is_a", "intersection_of", "union_of", "equivalent_to", "disjoint_from", 
         "relationship", "created_by", "creation_date", "is_obsolete", 
-        "replaced_by", "consider")
+        "replaced_by", "consider"
+    )
+    ## keep only known columns
+    elements <- elements[names(elements) %in% term_tags]
 
-    sub_elements <- elements[,names(elements) %in% term_tags]
-     
-    subjects <- sub_elements$id
-
-    terms <- lapply(seq_along(subjects), function(x) {
-        less_elements <- sub_elements[x, which(!is.na(sub_elements[x,]))]
-        titles <- names(less_elements)
-        lens <- sapply(seq_along(titles), function(y) {
-            lengths(less_elements[, y][[1]])
-        })
-        expand_titles <- rep(titles, lens)
-        paste0(expand_titles, ": ", unlist(less_elements))
-        # how can I arrange the "list" items to reflect term_tags?
-    })
+    ## term-key-value tibble
+    kv <- tibble(
+        term = rep(seq_len(nrow(elements)), ncol(elements)),
+        key = rep(names(elements), each = nrow(elements)),
+        value = unlist(elements, recursive = FALSE, use.names = FALSE)
+    )
+    ## 'unlist' value
+    long <- tibble(
+        term = rep(kv$term, lengths(kv$value)),
+        key = rep(kv$key, lengths(kv$value)),
+        value = unlist(kv$value)
+    )
     
-    names(terms) <- rep("\n[Term]\n", length(terms))
-    #colnames(terms) <- rep("\n[Term]\n", dim(terms)[2])
+    tkv <-
+        long %>%
+        ## drop NAs
+        filter(!is.na(.data$value)) %>%
+        ## arrange by term then order in term_tags
+        arrange(.data$term, factor(.data$key, levels = term_tags))
 
-    ## can't writeLines lists, just character objects
-    writeLines(terms, path)
+    records <- split(paste(tkv$key, tkv$value, sep=": "), tkv$term)
+    con <- file(path, "at")
+    ## write header lines
+    writeLines(metadata(tbl)$obo_header, con)
+    ## write each record
+    for (record in records)
+        writeLines(c("", "[TERM]", record), con)
+    close(con)
+
+    invisible(path)
 }
 
 #' @rdname import
-#' @export
-#' 
+#' @examples
 #' fl <- system.file("extdata", "sample_go.obo", package = "BiocSet")
 #' tbl <- import(fl)
 #' new_fl <- tempfile(fileext = ".obo")
 #' obo <- export(tbl, new_fl)
+#' @export
 setMethod(
     "export", c("BiocSet", "OBOFile", "ANY"),
     function(object, con, format, ...)
 {
-    export.BiocSet_to_obo(object, resource(con))
+    .export_obo(object, resource(con))
 })

@@ -5,6 +5,7 @@
 \alias{import,GMTFile,ANY,ANY-method}
 \alias{export,BiocSet,GMTFile,ANY-method}
 \alias{import,OBOFile,ANY,ANY-method}
+\alias{export,BiocSet,OBOFile,ANY-method}
 \title{Importing/exporting}
 \usage{
 \S4method{import}{GMTFile,ANY,ANY}(con, format, text, ...)
@@ -12,6 +13,8 @@
 \S4method{export}{BiocSet,GMTFile,ANY}(object, con, format, ...)
 
 \S4method{import}{OBOFile,ANY,ANY}(con, format, text, ...)
+
+\S4method{export}{BiocSet,OBOFile,ANY}(object, con, format, ...)
 }
 \arguments{
 \item{con}{For \code{import}, the file name or URL the element set is
@@ -49,4 +52,8 @@ gmt <- export(tbl2, fl)
 
 oboFile <- system.file(package = "BiocSet", "extdata", "sample_go.obo")
 tst_obo <- import(oboFile)
+fl <- system.file("extdata", "sample_go.obo", package = "BiocSet")
+tbl <- import(fl)
+new_fl <- tempfile(fileext = ".obo")
+obo <- export(tbl, new_fl)
 }
