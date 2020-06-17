@@ -10,11 +10,14 @@ setOldClass(c("tbl_element", "tbl_set", "tbl_elementset"))
 #' @slot set The set tibble from `tbl_elementset`
 #' @slot elementset The elementset tibble created from user input
 #' @slot active Character, indicates which tibble is active
+#' @importClassesFrom S4Vectors Annotated
+#' @importFrom S4Vectors metadata "metadata<-"
 #' @exportClass BiocSet
 NULL
 
 .BiocSet <- setClass(
     "BiocSet",
+    contains = "Annotated",
     slots = c(
         element = "tbl_element",
         set = "tbl_set",
