@@ -30,25 +30,23 @@ OBOFile = function(resource, ...)
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr rename
 .import_obo <- function(path, extract_tags = "minimal") {
-    namespace <- id <- element <- NULL
     stopifnot(extract_tags %in% c("minimal", "everything"))
     if (extract_tags == "everything") {
         obo <- get_ontology(path, extract_tags = "everything")
         elements <- as_tibble(lapply(obo, as.vector)) %>%
-            filter(!namespace %in% "external") %>%
-            rename(element = id)
+            filter(!.data$namespace %in% "external") %>%
+            rename(element = "id")
     } else {
         obo <- get_ontology(path)
         elements <- as_tibble(lapply(obo, as.vector)) %>%
-            rename(element = id)
+            rename(element = "id")
     }
 
-    children <- name <- parents <- ancestors <- set <- NULL
     sets <- 
         elements %>%
-        filter(lengths(children) > 0) %>%
-        select(element, name, parents, children, ancestors) %>%
-        rename(set = element)
+        filter(lengths(.data$children) > 0) %>%
+        select("element", "name", "parents", "children", "ancestors") %>%
+        rename(set = "element")
 
     myunnest <- function(tbl) {
         tibble(
@@ -59,9 +57,9 @@ OBOFile = function(resource, ...)
 
     elementsets <- 
         elements %>%
-        filter(lengths(children) > 0) %>%
-        rename(set = element) %>%
-        select(set, element = children) %>%
+        filter(lengths(.data$children) > 0L) %>%
+        rename(set = "element") %>%
+        select("set", element = "children") %>%
         myunnest()
 
     ## elements not in any set are in their own set
@@ -196,7 +194,7 @@ oboset_set_ancestors <- function(oboset) {
     writeLines(metadata(tbl)$obo_header, con)
     ## write each record
     for (record in records)
-        writeLines(c("", "[TERM]", record), con)
+        writeLines(c("", "[Term]", record), con)
     close(con)
 
     invisible(path)

@@ -197,9 +197,9 @@ BiocSet_from_elementset <- function(elementset, element, set)
     )
 
     es <- do.call(BiocSet, split(elementset$element, elementset$set))
-    es <- left_join_element(es, element)
-    es <- left_join_set(es, set)
-    es <- left_join_elementset(es, elementset)
+    es <- left_join_element(es, element, by = "element")
+    es <- left_join_set(es, set, by = "set")
+    es <- left_join_elementset(es, elementset, by = c("element", "set"))
 
     if (nrow(element) > nrow(es_element(es)))
         message("more elements in 'element' than in 'elementset'")
