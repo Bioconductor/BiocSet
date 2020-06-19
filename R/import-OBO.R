@@ -62,7 +62,17 @@ OBOFile = function(resource, ...)
         filter(lengths(children) > 0) %>%
         rename(set = element) %>%
         select(set, element = children) %>%
-        myunnest
+        myunnest()
+
+    ## elements not in any set are in their own set
+    identity <-
+        elements %>%
+        select("element") %>%
+        anti_join(elementsets, by = "element") %>%
+        mutate(set = .data$element)
+    elementsets <-
+        elementsets %>%
+        bind_rows(identity)
 
     oboset <- BiocSet_from_elementset(elementsets, elements, sets)
     .OBOSet(oboset, metadata = list(obo_header = attr(obo, "version")))
