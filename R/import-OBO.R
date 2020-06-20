@@ -1,26 +1,3 @@
-check_ancestry <- function(object) {
-    errors <- character()
-
-    if (!("children" %in% names(.set(object)))) {
-        msg <- "'children' needs to be included in the obo file."
-        errors <- c(errors, msg)
-    }
-
-    if (!("parents" %in% names(.set(object)))) {
-        msg <- "'parents' needs to be included in the obo file."
-        errors <- c(errors, msg)
-    }
-
-    if (!("ancestors" %in% names(.set(object)))) {
-        msg <- "'ancestors' needs to be included in the obo file."
-        errors <- c(errors, msg)
-    }
-
-    if (length(errors) == 0) TRUE else errors
-}
-
-.OBOSet <- setClass("OBOSet", contains = "BiocSet", validity = check_ancestry)
-
 .OBOFile = setClass("OBOFile", contains = "RTLFile")
 
 OBOFile = function(resource, ...)
@@ -28,7 +5,7 @@ OBOFile = function(resource, ...)
 
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
-#' @importFrom dplyr rename
+#' @importFrom dplyr rename anti_join
 .import_obo <- function(path, extract_tags = "minimal") {
     stopifnot(extract_tags %in% c("minimal", "everything"))
     if (extract_tags == "everything") {
@@ -42,7 +19,7 @@ OBOFile = function(resource, ...)
             rename(element = "id")
     }
 
-    sets <- 
+    sets <-
         elements %>%
         filter(lengths(.data$children) > 0) %>%
         select("element", "name", "parents", "children", "ancestors") %>%
@@ -55,7 +32,7 @@ OBOFile = function(resource, ...)
         )
     }
 
-    elementsets <- 
+    elementsets <-
         elements %>%
         filter(lengths(.data$children) > 0L) %>%
         rename(set = "element") %>%
@@ -72,8 +49,16 @@ OBOFile = function(resource, ...)
         elementsets %>%
         bind_rows(identity)
 
-    oboset <- BiocSet_from_elementset(elementsets, elements, sets)
-    .OBOSet(oboset, metadata = list(obo_header = attr(obo, "version")))
+    ## header
+    version <- attr(obo, "version")
+    pattern <- "^([^:]+):(.*)"
+    obo_header <- tibble(
+        key = sub(pattern, "\\1", version),
+        value = trimws(sub(pattern, "\\2", version))
+    )
+    metadata <- list(obo_header = obo_header)
+
+    OBOSet(elementsets, elements, sets, metadata)
 }
 
 #' @rdname import
@@ -142,7 +127,7 @@ oboset_set_ancestors <- function(oboset) {
         .is_tbl_elementset(es_elementset(tbl)),
         `'path' exists` = !file.exists(path)
     )
-    
+
     elements <- es_element(tbl)
     ## better to use colnames() or names()?
     if (!"id" %in% names(elements))
@@ -160,9 +145,9 @@ oboset_set_ancestors <- function(oboset) {
 
     term_tags <- c(
         "id", "is_anonymous", "name", "namespace", "alt_id", "def",
-        "comment", "subset", "synonym", "xref", "builtin", "property_value", 
-        "is_a", "intersection_of", "union_of", "equivalent_to", "disjoint_from", 
-        "relationship", "created_by", "creation_date", "is_obsolete", 
+        "comment", "subset", "synonym", "xref", "builtin", "property_value",
+        "is_a", "intersection_of", "union_of", "equivalent_to", "disjoint_from",
+        "relationship", "created_by", "creation_date", "is_obsolete",
         "replaced_by", "consider"
     )
     ## keep only known columns
@@ -180,7 +165,7 @@ oboset_set_ancestors <- function(oboset) {
         key = rep(kv$key, lengths(kv$value)),
         value = unlist(kv$value)
     )
-    
+
     tkv <-
         long %>%
         ## drop NAs
@@ -189,9 +174,14 @@ oboset_set_ancestors <- function(oboset) {
         arrange(.data$term, factor(.data$key, levels = term_tags))
 
     records <- split(paste(tkv$key, tkv$value, sep=": "), tkv$term)
+
+    ## output
     con <- file(path, "at")
+
     ## write header lines
-    writeLines(metadata(tbl)$obo_header, con)
+    header <- metadata(tbl)$obo_header
+    writeLines(paste0(header$key, ": ", header$value), con)
+
     ## write each record
     for (record in records)
         writeLines(c("", "[Term]", record), con)

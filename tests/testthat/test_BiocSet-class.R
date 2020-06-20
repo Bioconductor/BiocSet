@@ -31,6 +31,8 @@ test_that("'BiocSet()' works",
 })
 
 test_that("'BiocSet_from_elementset()' works", {
+    expect_identical(BiocSet_from_elementset(), BiocSet())
+
     set.seed(123)
     element <- tibble(element = letters[1:10], v1 = sample(10), v2 = sample(10))
     set <- tibble(set = LETTERS[1:2], v1 = sample(2), v2 = sample(2))
@@ -64,6 +66,5 @@ test_that("'BiocSet_from_elementset()' works", {
     expect_identical(dim(es_set(es3)), c(2L, 3L))
     expect_identical(dim(es_elementset(es3)), c(10L, 2L))
 
-    expect_error(BiocSet_from_elementset())
     expect_error(BiocSet_from_elementset(elementset = 1:5))
 })
