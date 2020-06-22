@@ -64,3 +64,41 @@ test_that("'import()' works", {
     expect_error(import(oboFile, extract_tag = all))
     expect_error(import(oboFile, extract_tag = "all"))
 })
+
+test_that("'.export_obo()' works", {
+    oboFile <- system.file("extdata", "sample_go.obo", package = "BiocSet")
+
+    ## minimal
+    foo <- import(oboFile)
+    fl <- tempfile(fileext=".obo")
+    .export_obo(foo, fl)
+    expect_equal(foo, import(fl))
+
+    ## everything
+    #foo <- import(oboFile, extract_tag = "everything")
+    #fl <- tempfile(fileext=".obo")
+    #.export_obo(foo, fl)
+    #expect_equal(foo, import(fl, extract_tag = "everything"))
+
+    #foo2 <- foo %>% select_element(!obosolete)
+    #expect_error(.export_obo(foo2, fl))
+})
+
+test_that("'export()' works", {
+    oboFile <- system.file("extdata", "sample_go.obo", package = "BiocSet")
+
+    ## minimal
+    foo <- import(oboFile)
+    fl <- tempfile(fileext=".obo")
+    export(foo, fl)
+    expect_equal(foo, import(fl))
+
+#    ## everything
+#    foo <- import(oboFile, extract_tag = "everything")
+#    fl <- tempfile(fileext=".obo")
+#    export(foo, fl)
+#    expect_equal(foo, import(fl, extract_tag = "everything"))
+#
+#    foo2 <- foo %>% select_element(!obsolete)
+#    expect_error(export(foo2, fl))
+})

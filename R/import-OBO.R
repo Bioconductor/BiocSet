@@ -127,9 +127,8 @@ oboset_set_ancestors <- function(oboset) {
         .is_tbl_elementset(es_elementset(tbl)),
         `'path' exists` = !file.exists(path)
     )
-
+    
     elements <- es_element(tbl)
-    ## better to use colnames() or names()?
     if (!"id" %in% names(elements))
         elements <- elements %>% rename(id = "element")
 
@@ -143,15 +142,21 @@ oboset_set_ancestors <- function(oboset) {
             mutate(is_obsolete = as.integer(.data$is_obsolete))
     }
 
+    ## order elements by id
+    elements <- elements %>% arrange(.data$id)
+
+    ## Need to account for diff format versions, order and tags can change
+    ## These tags are for format version 1.2
+    ## FIXME: Need to fix part_of getting dropped from original file
     term_tags <- c(
         "id", "is_anonymous", "name", "namespace", "alt_id", "def",
-        "comment", "subset", "synonym", "xref", "builtin", "property_value",
-        "is_a", "intersection_of", "union_of", "equivalent_to", "disjoint_from",
-        "relationship", "created_by", "creation_date", "is_obsolete",
-        "replaced_by", "consider"
+        "comment", "subset", "synonym", "xref", "is_a", "intersection_of",
+        "union_of", "disjoint_from", "relationship", "is_obsolete",
+        "replaced_by", "consider", "created_by", "creation_date"
     )
     ## keep only known columns
     elements <- elements[names(elements) %in% term_tags]
+
 
     ## term-key-value tibble
     kv <- tibble(
