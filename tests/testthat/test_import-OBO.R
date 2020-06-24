@@ -24,7 +24,7 @@ test_that("'.import_obo()' works", {
     foo_all <- .import_obo(oboFile, extract_tag = "everything")
     expect_s4_class(foo_all, "OBOSet")
     expect_true(.is_tbl_elementset(.elementset(foo_all)))
-    expect_identical(dim(.element(foo_all)), c(8L, 26L))
+    expect_identical(dim(.element(foo_all)), c(8L, 17L))
     expect_identical(dim(.set(foo_all)), c(7L, 5L))
     expect_identical(dim(.elementset(foo_all)), c(8L, 2L))
     expect_type(.element(foo_all)$obsolete, "logical")
@@ -55,7 +55,7 @@ test_that("'import()' works", {
     foo_all <- import(oboFile, extract_tag = "everything")
     expect_s4_class(foo_all, "OBOSet")
     expect_true(.is_tbl_elementset(.elementset(foo_all)))
-    expect_identical(dim(.element(foo_all)), c(8L, 26L))
+    expect_identical(dim(.element(foo_all)), c(8L, 17L))
     expect_identical(dim(.set(foo_all)), c(7L, 5L))
     expect_identical(dim(.elementset(foo_all)), c(8L, 2L))
 
@@ -75,13 +75,13 @@ test_that("'.export_obo()' works", {
     expect_equal(foo, import(fl))
 
     ## everything
-    #foo <- import(oboFile, extract_tag = "everything")
-    #fl <- tempfile(fileext=".obo")
-    #.export_obo(foo, fl)
-    #expect_equal(foo, import(fl, extract_tag = "everything"))
+    foo <- import(oboFile, extract_tag = "everything")
+    fl <- tempfile(fileext=".obo")
+    .export_obo(foo, fl)
+    expect_equal(foo, import(fl, extract_tag = "everything"))
 
-    #foo2 <- foo %>% select_element(!obosolete)
-    #expect_error(.export_obo(foo2, fl))
+    foo2 <- foo %>% select_element(!obsolete)
+    expect_error(.export_obo(foo2, fl))
 })
 
 test_that("'export()' works", {
@@ -93,12 +93,12 @@ test_that("'export()' works", {
     export(foo, fl)
     expect_equal(foo, import(fl))
 
-#    ## everything
-#    foo <- import(oboFile, extract_tag = "everything")
-#    fl <- tempfile(fileext=".obo")
-#    export(foo, fl)
-#    expect_equal(foo, import(fl, extract_tag = "everything"))
-#
-#    foo2 <- foo %>% select_element(!obsolete)
-#    expect_error(export(foo2, fl))
+    ## everything
+    foo <- import(oboFile, extract_tag = "everything")
+    fl <- tempfile(fileext=".obo")
+    export(foo, fl)
+    expect_equal(foo, import(fl, extract_tag = "everything"))
+
+    foo2 <- foo %>% select_element(!obsolete)
+    expect_error(export(foo2, fl))
 })

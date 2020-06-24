@@ -6,16 +6,37 @@ OBOFile = function(resource, ...)
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr rename anti_join
-.import_obo <- function(path, extract_tags = "minimal") {
-    stopifnot(extract_tags %in% c("minimal", "everything"))
-    if (extract_tags == "everything") {
-        obo <- get_ontology(path, extract_tags = "everything")
+.import_obo <- function(path, extract_tag = "minimal") {
+    stopifnot(extract_tag %in% c("minimal", "everything"))
+    
+    ## Need to account for diff format versions, order and tags can change
+    ## These tags are for format version 1.2
+    term_tags <- c(
+        "id", "is_anonymous", "name", "namespace", "alt_id", "def",
+        "comment", "subset", "synonym", "xref", "is_a", "intersection_of",
+        "union_of", "disjoint_from", "relationship", "is_obsolete",
+        "replaced_by", "consider", "created_by", "creation_date"
+    )    
+    if (extract_tag == "everything") {
+        obo <- get_ontology(path, extract_tag = "everything")
         elements <- as_tibble(lapply(obo, as.vector)) %>%
             filter(!.data$namespace %in% "external") %>%
             rename(element = "id")
+        info_columns <- elements[-c(1:6)]
+        if (!all(names(info_columns) %in% term_tags)) {
+            keep <- names(elements)[names(elements) %in% term_tags]
+            drop <- names(info_columns)[!names(info_columns) %in% term_tags]
+            elements <- elements %>% select(1:6, keep)
+            cat("The columns:\n", 
+                drop, 
+                "\nhave been dropped from es_element.\n",
+                sep = "\n"
+            )
+        }
     } else {
         obo <- get_ontology(path)
         elements <- as_tibble(lapply(obo, as.vector)) %>%
+            filter(grepl("GO:", id, fixed = TRUE)) %>%
             rename(element = "id")
     }
 
@@ -147,7 +168,6 @@ oboset_set_ancestors <- function(oboset) {
 
     ## Need to account for diff format versions, order and tags can change
     ## These tags are for format version 1.2
-    ## FIXME: Need to fix part_of getting dropped from original file
     term_tags <- c(
         "id", "is_anonymous", "name", "namespace", "alt_id", "def",
         "comment", "subset", "synonym", "xref", "is_a", "intersection_of",
