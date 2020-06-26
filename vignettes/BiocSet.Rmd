@@ -91,18 +91,40 @@ gmt <- export(tbl2, fl)
 gmt
 ```
 
-We also support importing obo files to create an `OBOSet` object which extends 
+We also support importing files to create an `OBOSet` object which extends 
 the `BiocSet` class. The default only displays the most basic amount of columns 
 needed to perform certain tasks, but the argument `extract_tag = everything` 
-allows for additional columns to be imported as well.
+allows for additional columns to be imported as well. The following workflow 
+will demonstrate the use of both export and import to create a smaller subset 
+of the large obo file that is accessable from GeneOntology.
 
-```{r obo}
+```{r obo, eval = FALSE}
+download.file("http://current.geneontology.org/ontology/go.obo", "obo_file.obo")
+
+foo <- import("obo_file.obo", extract_tag = "everything")
+
+small_tst <- es_element(foo)[1,] %>%
+    unnest("ancestors") %>%
+    select("element", "ancestors") %>%
+    unlist() %>%
+    unique()
+
+small_oboset <- foo %>% filter_elementset(element %in% small_tst)
+
+fl <- tempfile(fileext = ".obo")
+export(small_oboset, fl)
+```
+
+Then you can import this smaller obo file which we utilize here, in tests, and 
+example code.
+```{r small_obo}
 oboFile <- system.file(package = "BiocSet",
                         "extdata",
                         "sample_go.obo")
 obo <- import(oboFile)
 obo
 ```
+
 ## Implemented functions
 
 A feature available to `BiocSet` is the ability to activate different 

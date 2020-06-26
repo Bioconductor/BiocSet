@@ -6,8 +6,8 @@ OBOFile = function(resource, ...)
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
 #' @importFrom dplyr rename anti_join
-.import_obo <- function(path, extract_tag = "minimal") {
-    stopifnot(extract_tag %in% c("minimal", "everything"))
+.import_obo <- function(path, extract_tags = "minimal") {
+    stopifnot(extract_tags %in% c("minimal", "everything"))
     
     ## Need to account for diff format versions, order and tags can change
     ## These tags are for format version 1.2
@@ -17,8 +17,8 @@ OBOFile = function(resource, ...)
         "union_of", "disjoint_from", "relationship", "is_obsolete",
         "replaced_by", "consider", "created_by", "creation_date"
     )    
-    if (extract_tag == "everything") {
-        obo <- get_ontology(path, extract_tag = "everything")
+    if (extract_tags == "everything") {
+        obo <- get_ontology(path, extract_tags = "everything")
         elements <- as_tibble(lapply(obo, as.vector)) %>%
             filter(!.data$namespace %in% "external") %>%
             rename(element = "id")
@@ -36,7 +36,7 @@ OBOFile = function(resource, ...)
     } else {
         obo <- get_ontology(path)
         elements <- as_tibble(lapply(obo, as.vector)) %>%
-            filter(grepl("GO:", id, fixed = TRUE)) %>%
+            filter(grepl("GO:", .data$id, fixed = TRUE)) %>%
             rename(element = "id")
     }
 

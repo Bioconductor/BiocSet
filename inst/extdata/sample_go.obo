@@ -1,5 +1,5 @@
 format-version: 1.2
-data-version: releases/2020-05-02
+data-version: releases/2020-06-01
 subsetdef: gocheck_do_not_annotate "Term not to be used for direct annotation"
 subsetdef: gocheck_do_not_manually_annotate "Term not to be used for direct manual annotation"
 subsetdef: goslim_agr "AGR slim"
@@ -27,15 +27,47 @@ property_value: http://purl.org/dc/elements/1.1/title "Gene Ontology" xsd:string
 property_value: http://purl.org/dc/terms/license http://creativecommons.org/licenses/by/4.0/
 
 [Term]
-id: GO:0033955
-name: mitochondrial DNA inheritance
+id: GO:0000002
+name: mitochondrial genome maintenance
 namespace: biological_process
-alt_id: GO:0090142
-def: "The process in which copies of the mitochondrial genome are distributed into daughter mitochondria upon mitochondrial fission." [GOC:mah]
-synonym: "mitochondrial chromosome segregation" RELATED []
-synonym: "mitochondrial DNA segregation" RELATED []
-is_a: GO:0000002 ! mitochondrial genome maintenance
-relationship: part_of GO:0000266 ! mitochondrial fission
+def: "The maintenance of the structure and integrity of the mitochondrial genome; includes replication and segregation of the mitochondrial chromosome." [GOC:ai, GOC:vw]
+is_a: GO:0007005
+is_obsolete: 0
+
+[Term]
+id: GO:0006996
+name: organelle organization
+namespace: biological_process
+alt_id: GO:1902589
+def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of an organelle within a cell. An organelle is an organized structure of distinctive morphology and function. Includes the nucleus, mitochondria, plastids, vacuoles, vesicles, ribosomes and the cytoskeleton. Excludes the plasma membrane." [GOC:mah]
+subset: goslim_aspergillus
+subset: goslim_candida
+subset: goslim_pir
+synonym: "organelle organisation" EXACT []
+synonym: "organelle organization and biogenesis" RELATED [GOC:dph, GOC:jl, GOC:mah]
+synonym: "single organism organelle organization" EXACT [GOC:TermGenie]
+synonym: "single-organism organelle organization" RELATED []
+is_a: GO:0016043
+is_obsolete: 0
+created_by: jl
+creation_date: 2013-12-19T15:25:51Z
+
+[Term]
+id: GO:0007005
+name: mitochondrion organization
+namespace: biological_process
+def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of a mitochondrion; includes mitochondrial morphogenesis and distribution, and replication of the mitochondrial genome as well as synthesis of new mitochondrial components." [GOC:dph, GOC:jl, GOC:mah, GOC:sgd_curators, PMID:9786946]
+subset: goslim_chembl
+subset: goslim_drosophila
+subset: goslim_generic
+subset: goslim_pir
+subset: goslim_pombe
+subset: goslim_yeast
+synonym: "mitochondria organization" EXACT [GOC:mah]
+synonym: "mitochondrion organisation" EXACT [GOC:mah]
+synonym: "mitochondrion organization and biogenesis" RELATED []
+is_a: GO:0006996
+is_obsolete: 0
 
 [Term]
 id: GO:0008150
@@ -60,6 +92,7 @@ synonym: "physiological process" EXACT []
 synonym: "single organism process" RELATED []
 synonym: "single-organism process" RELATED []
 xref: Wikipedia:Biological_process
+is_obsolete: 0
 created_by: jl
 creation_date: 2012-09-19T15:05:24Z
 
@@ -76,25 +109,11 @@ synonym: "cell growth and/or maintenance" NARROW []
 synonym: "cell physiology" EXACT []
 synonym: "cellular physiological process" EXACT []
 synonym: "single-organism cellular process" RELATED []
-is_a: GO:0008150 ! biological_process
-disjoint_from: GO:0044848 ! biological phase
+is_a: GO:0008150
+disjoint_from: GO:0044848
+is_obsolete: 0
 created_by: jl
 creation_date: 2012-12-11T16:56:55Z
-
-[Term]
-id: GO:0071840
-name: cellular component organization or biogenesis
-namespace: biological_process
-alt_id: GO:0071841
-def: "A process that results in the biosynthesis of constituent macromolecules, assembly, arrangement of constituent parts, or disassembly of a cellular component." [GOC:mah]
-subset: goslim_flybase_ribbon
-subset: goslim_metagenomics
-synonym: "cellular component organisation or biogenesis" EXACT [GOC:mah]
-synonym: "cellular component organisation or biogenesis at cellular level" EXACT [GOC:mah]
-synonym: "cellular component organization or biogenesis at cellular level" EXACT []
-is_a: GO:0009987 ! cellular process
-created_by: mah
-creation_date: 2010-09-10T01:39:16Z
 
 [Term]
 id: GO:0016043
@@ -113,45 +132,32 @@ synonym: "cellular component organisation at cellular level" EXACT [GOC:mah]
 synonym: "cellular component organisation in other organism" EXACT [GOC:mah]
 synonym: "cellular component organization at cellular level" EXACT []
 synonym: "cellular component organization in other organism" EXACT []
-is_a: GO:0071840 ! cellular component organization or biogenesis
+is_a: GO:0071840
+is_obsolete: 0
 
 [Term]
-id: GO:0006996
-name: organelle organization
+id: GO:0033955
+name: mitochondrial DNA inheritance
 namespace: biological_process
-alt_id: GO:1902589
-def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of an organelle within a cell. An organelle is an organized structure of distinctive morphology and function. Includes the nucleus, mitochondria, plastids, vacuoles, vesicles, ribosomes and the cytoskeleton. Excludes the plasma membrane." [GOC:mah]
-subset: goslim_aspergillus
-subset: goslim_candida
-subset: goslim_pir
-synonym: "organelle organisation" EXACT []
-synonym: "organelle organization and biogenesis" RELATED [GOC:dph, GOC:jl, GOC:mah]
-synonym: "single organism organelle organization" EXACT [GOC:TermGenie]
-synonym: "single-organism organelle organization" RELATED []
-is_a: GO:0016043 ! cellular component organization
-created_by: jl
-creation_date: 2013-12-19T15:25:51Z
+alt_id: GO:0090142
+def: "The process in which copies of the mitochondrial genome are distributed into daughter mitochondria upon mitochondrial fission." [GOC:mah]
+synonym: "mitochondrial chromosome segregation" RELATED []
+synonym: "mitochondrial DNA segregation" RELATED []
+is_a: GO:0000002
+is_obsolete: 0
 
 [Term]
-id: GO:0007005
-name: mitochondrion organization
+id: GO:0071840
+name: cellular component organization or biogenesis
 namespace: biological_process
-def: "A process that is carried out at the cellular level which results in the assembly, arrangement of constituent parts, or disassembly of a mitochondrion; includes mitochondrial morphogenesis and distribution, and replication of the mitochondrial genome as well as synthesis of new mitochondrial components." [GOC:dph, GOC:jl, GOC:mah, GOC:sgd_curators, PMID:9786946]
-subset: goslim_chembl
-subset: goslim_drosophila
-subset: goslim_generic
-subset: goslim_pir
-subset: goslim_pombe
-subset: goslim_yeast
-synonym: "mitochondria organization" EXACT [GOC:mah]
-synonym: "mitochondrion organisation" EXACT [GOC:mah]
-synonym: "mitochondrion organization and biogenesis" RELATED []
-is_a: GO:0006996 ! organelle organization
-
-[Term]
-id: GO:0000002
-name: mitochondrial genome maintenance
-namespace: biological_process
-def: "The maintenance of the structure and integrity of the mitochondrial genome; includes replication and segregation of the mitochondrial chromosome." [GOC:ai, GOC:vw]
-is_a: GO:0007005 ! mitochondrion organization
-
+alt_id: GO:0071841
+def: "A process that results in the biosynthesis of constituent macromolecules, assembly, arrangement of constituent parts, or disassembly of a cellular component." [GOC:mah]
+subset: goslim_flybase_ribbon
+subset: goslim_metagenomics
+synonym: "cellular component organisation or biogenesis" EXACT [GOC:mah]
+synonym: "cellular component organisation or biogenesis at cellular level" EXACT [GOC:mah]
+synonym: "cellular component organization or biogenesis at cellular level" EXACT []
+is_a: GO:0009987
+is_obsolete: 0
+created_by: mah
+creation_date: 2010-09-10T01:39:16Z
