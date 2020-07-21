@@ -112,17 +112,19 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
 oboset_element_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
-        es_element() %>%
-        select(c("element", "children")) %>%
-        unnest("children")
+        es_elementset() %>%
+        filter(is_a == "TRUE") %>%
+        select("set", "element") %>%
+        rename(element = "set", children = "element")
 }
 
 oboset_element_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
-        es_element() %>%
-        select(c("element", "parents")) %>%
-        unnest("parents")
+        es_elementset() %>%
+        filter(is_a == "TRUE") %>%
+        select("element", "set") %>%
+        rename(parents = "set")
 }
 
 oboset_element_ancestors <- function(oboset) {
@@ -133,6 +135,7 @@ oboset_element_ancestors <- function(oboset) {
         unnest("ancestors")
 }
 
+## Seems repetative now...?
 oboset_set_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
@@ -141,6 +144,7 @@ oboset_set_children <- function(oboset) {
         unnest("children")
 }
 
+## Seems repetative now...?
 oboset_set_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
@@ -149,6 +153,7 @@ oboset_set_parents <- function(oboset) {
         unnest("parents")
 }
 
+## Seems repetative now...?
 oboset_set_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
