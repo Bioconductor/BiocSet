@@ -108,21 +108,27 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
     .import_obo(resource(con), ...)
 })
 
+.element_elementset <- function(oboset) {
+    inner_join(es_element(oboset), es_elementset(oboset), by = "element")
+}
+
+.set_elementset <- function(oboset) {
+    inner_join(es_set(oboset), es_elementset(oboset), by = "set")
+}
+
 #' @importFrom tidyr unnest
 oboset_element_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
-    oboset %>%
-        es_elementset() %>%
-        filter(is_a == "TRUE") %>%
+    .element_elementset(oboset) %>%
+        filter(is_a) %>%
         select("set", "element") %>%
         rename(element = "set", children = "element")
 }
 
 oboset_element_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
-    oboset %>%
-        es_elementset() %>%
-        filter(is_a == "TRUE") %>%
+    .element_elementset(oboset) %>%
+        filter(is_a) %>%
         select("element", "set") %>%
         rename(parents = "set")
 }
@@ -135,25 +141,22 @@ oboset_element_ancestors <- function(oboset) {
         unnest("ancestors")
 }
 
-## Seems repetative now...?
 oboset_set_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
-    oboset %>%
-        es_set() %>%
-        select(c("set", "children")) %>%
-        unnest("children")
+    .set_elementset(oboset) %>%
+        filter(is_a) %>%
+        select("set", "element") %>%
+        rename(children = "element")
 }
 
-## Seems repetative now...?
 oboset_set_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
-    oboset %>%
-        es_set() %>%
-        select(c("set", "parents")) %>%
-        unnest("parents")
+    .set_elementset(oboset) %>%
+        filter(is_a) %>%
+        select("element", "set") %>%
+        rename(set = "element", parents = "set")
 }
 
-## Seems repetative now...?
 oboset_set_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
