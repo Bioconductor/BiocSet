@@ -109,18 +109,35 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
 })
 
 .element_elementset <- function(oboset) {
-    inner_join(es_element(oboset), es_elementset(oboset), by = "element")
+    ## Not sure if this is the best way to accomplish this...
+    ## basically accounting for two is_a columns when extracting "everything"
+    if (ncol(es_element(oboset)) > 3)
+        inner_join(es_element(oboset),
+            es_elementset(oboset), by = "element") %>%
+            filter(is_a.y)
+    else 
+        inner_join(es_element(oboset), 
+            es_elementset(oboset), by = "element") %>%
+            filter(is_a)
 }
 
 .set_elementset <- function(oboset) {
-    inner_join(es_set(oboset), es_elementset(oboset), by = "set")
+    ## Same for this if else...
+    ## trying to catch the double is_a when extracting "everything"
+    if (ncol(es_set(oboset)) > 2)
+        inner_join(es_set(oboset), 
+            es_elementset(oboset), by = "set") %>%
+            filter(is_a.y)
+    else
+        inner_join(es_set(oboset), 
+            es_elementset(oboset), by = "set") %>%
+            filter(is_a)
 }
 
 #' @importFrom tidyr unnest
 oboset_element_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .element_elementset(oboset) %>%
-        filter(is_a) %>%
         select("set", "element") %>%
         rename(element = "set", children = "element")
 }
@@ -128,7 +145,6 @@ oboset_element_children <- function(oboset) {
 oboset_element_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .element_elementset(oboset) %>%
-        filter(is_a) %>%
         select("element", "set") %>%
         rename(parents = "set")
 }
@@ -136,15 +152,13 @@ oboset_element_parents <- function(oboset) {
 oboset_element_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
-        es_element() %>%
-        select(c("element", "ancestors")) %>%
-        unnest("ancestors")
+        filter_element(element %in% es_elementset(oboset)$element %>%
+        .ancestors
 }
 
 oboset_set_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .set_elementset(oboset) %>%
-        filter(is_a) %>%
         select("set", "element") %>%
         rename(children = "element")
 }
@@ -152,7 +166,6 @@ oboset_set_children <- function(oboset) {
 oboset_set_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .set_elementset(oboset) %>%
-        filter(is_a) %>%
         select("element", "set") %>%
         rename(set = "element", parents = "set")
 }
@@ -160,9 +173,78 @@ oboset_set_parents <- function(oboset) {
 oboset_set_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
-        es_set() %>%
-        select(c("set", "ancestors")) %>%
-        unnest("ancestors")
+        filter_set(set %in% es_elementset(oboset)$set) %>%
+        .ancestors
+}
+
+.ancestors_merge <-
+    function(ancestors, child, parent)
+{
+    ## ancestors of each child: the parent, and the parent's
+    ## ancestors. A child is it's own ancestor
+    ancestors0 <- Map(c, child, parent, ancestors[parent])
+    ## a child may have more than one parent; unlist and re-split by child
+    ancestors1 <- split(
+        unlist(ancestors0, use.names = FALSE),
+        rep(child, lengths(ancestors0))
+    )
+    
+    ## combine newly identified ancestors with existing ancestors
+    ## some newly identified ancestors may add to existing ancestors
+    UFUN <- function(...) unique(c(...))
+    duplicates <- intersect(names(ancestors), names(ancestors1))
+    c(
+        ancestors[setdiff(names(ancestors), duplicates)],
+        ancestors1[setdiff(names(ancestors1), duplicates)],
+        Map(UFUN, ancestors[duplicates], ancestors1[duplicates])
+    )
+}
+
+.ancestors <-
+    function(obo)
+{
+    stopifnot(is(obo, "OBOSet"))
+    
+    es <- es_elementset(obo) %>%
+        filter(is_a) %>%
+        select("element", "set") %>%
+        distinct()
+    
+    child <- es %>% pull("element")
+    parent <- es %>% pull("set")
+    
+    ancestor0 <- parent[!parent %in% child]
+    root <- ancestor <- unique(ancestor0)
+    ancestors <- setNames(as.list(root), root)
+    
+    total <- length(ancestor0)
+    while (length(ancestor)) {
+        ## index of parents who will beccome an ancestor this iteration
+        idx <- parent %in% ancestor
+        
+        ## update list of ancestors
+        ancestors <- .ancestors_merge(ancestors, child[idx], parent[idx])
+        
+        ## remove child-parent pairs of ancestors
+        child <- child[!idx]
+        parent <- parent[!idx]
+        ancestor0 <- parent[!parent %in% child]
+        ancestor <- unique(ancestor0)
+    }
+    
+    ## all elements are there own ancestor
+    child <-
+        es_elementset(obo) %>%
+        pull("element") %>%
+        unique()
+    ancestors <- .ancestors_merge(ancestors, child, child)
+    
+    ## tidy up
+    ancestors <- lapply(ancestors, unique)
+    tibble(
+        element = rep(names(ancestors), lengths(ancestors)),
+        ancestor = unlist(ancestors, use.names = FALSE)
+    )
 }
 
 .oboset_is_a <- function(oboset) {
@@ -170,7 +252,7 @@ oboset_set_ancestors <- function(oboset) {
         es_elementset(oboset) %>%
         filter(.data$is_a) %>%
         select("element", "set")
-    split(isa$element, isa$set) %>%
+    split(isa$set, isa$element) %>%
         tibble(element = names(.)) %>%
         select(element, is_a = ".") %>%
         mutate(is_a = unname(is_a))
