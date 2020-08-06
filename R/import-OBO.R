@@ -26,7 +26,7 @@ OBOFile = function(resource, ...)
 
 #' @importFrom ontologyIndex get_ontology
 #' @importFrom tibble as_tibble tibble
-#' @importFrom dplyr rename anti_join
+#' @importFrom dplyr rename anti_join right_join
 .import_obo <- function(path, extract_tags = "minimal") {
     stopifnot(
         extract_tags %in% c("minimal", "everything")
@@ -34,6 +34,7 @@ OBOFile = function(resource, ...)
     
     obo <- get_ontology(path, extract_tags = "everything")
 
+    key <- NULL
     ## header
     version0 <- attr(obo, "version")
     pattern <- "^([^:]+):(.*)"
@@ -109,6 +110,7 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
 })
 
 .element_elementset <- function(oboset) {
+    is_a <- NULL
     inner_join(es_element(oboset),
         filter(es_elementset(oboset), is_a), 
         by = "element"
@@ -119,7 +121,21 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
     inner_join(es_set(oboset), es_elementset(oboset), by = "set")
 }
 
+#' Functions to display relationships of an \code{OBOSet} object
+#' @rdname obo_relations
+#' @name obo_relations
+#' @description These functions will display the relationships (children, 
+#'     parents, or ancestors) for either the elements or the sets of an 
+#'     \code{OBOSet} object.
+#' @param oboset The \code{OBOSet} of interest.
 #' @importFrom tidyr unnest
+#' @importFrom dplyr inner_join
+#' @return A 2 column tibble.
+#' @export
+#' @examples
+#' oboFile <- system.file("extdata", "sample_go.obo", package = "BiocSet")
+#' obo <- import(oboFile)
+#' oboset_element_children(obo) 
 oboset_element_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .element_elementset(oboset) %>%
@@ -127,6 +143,11 @@ oboset_element_children <- function(oboset) {
         rename(element = "set", children = "element")
 }
 
+#' @rdname obo_relations
+#' @export
+#' @examples
+#' 
+#' oboset_element_parents(obo)
 oboset_element_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .element_elementset(oboset) %>%
@@ -134,13 +155,25 @@ oboset_element_parents <- function(oboset) {
         rename(parents = "set")
 }
 
+#' @rdname obo_relations
+#' @importFrom stats setNames
+#' @export
+#' @examples
+#'
+#' oboset_element_ancestors(obo)
 oboset_element_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
+    element <- NULL
     oboset %>%
         filter_element(element %in% es_elementset(oboset)$element) %>%
         .ancestors
 }
 
+#' @rdname obo_relations
+#' @export
+#' @examples
+#'
+#' oboset_set_children(obo)
 oboset_set_children <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .set_elementset(oboset) %>%
@@ -148,6 +181,11 @@ oboset_set_children <- function(oboset) {
         rename(children = "element")
 }
 
+#' @rdname obo_relations
+#' @export
+#' @examples
+#'
+#' oboset_set_parents(obo)
 oboset_set_parents <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     .set_elementset(oboset) %>%
@@ -155,8 +193,14 @@ oboset_set_parents <- function(oboset) {
         rename(set = "element", parents = "set")
 }
 
+#' @rdname obo_relations
+#' @export
+#' @examples
+#'
+#' oboset_set_ancestors(obo)
 oboset_set_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
+    set <- NULL
     oboset %>%
         filter_set(set %in% es_elementset(oboset)$set) %>%
         .ancestors
@@ -190,6 +234,7 @@ oboset_set_ancestors <- function(oboset) {
 {
     stopifnot(is(obo, "OBOSet"))
     
+    is_a <- NULL
     es <- es_elementset(obo) %>%
         filter(is_a) %>%
         select("element", "set") %>%
@@ -233,6 +278,7 @@ oboset_set_ancestors <- function(oboset) {
 }
 
 .oboset_is_a <- function(oboset) {
+    . <- element <- is_a <- NULL
     isa <-
         es_elementset(oboset) %>%
         filter(.data$is_a) %>%
@@ -248,7 +294,8 @@ oboset_set_ancestors <- function(oboset) {
         .is_tbl_elementset(es_elementset(tbl)),
         `'path' exists` = !file.exists(path)
     )
-    
+   
+    value <- NULL
     version <-
         metadata(tbl)[["obo_header"]] %>%
         filter(.data$key == "format-version") %>%
