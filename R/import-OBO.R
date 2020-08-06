@@ -109,29 +109,14 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
 })
 
 .element_elementset <- function(oboset) {
-    ## Not sure if this is the best way to accomplish this...
-    ## basically accounting for two is_a columns when extracting "everything"
-    if (ncol(es_element(oboset)) > 3)
-        inner_join(es_element(oboset),
-            es_elementset(oboset), by = "element") %>%
-            filter(is_a.y)
-    else 
-        inner_join(es_element(oboset), 
-            es_elementset(oboset), by = "element") %>%
-            filter(is_a)
+    inner_join(es_element(oboset),
+        filter(es_elementset(oboset), is_a), 
+        by = "element"
+    )
 }
 
 .set_elementset <- function(oboset) {
-    ## Same for this if else...
-    ## trying to catch the double is_a when extracting "everything"
-    if (ncol(es_set(oboset)) > 2)
-        inner_join(es_set(oboset), 
-            es_elementset(oboset), by = "set") %>%
-            filter(is_a.y)
-    else
-        inner_join(es_set(oboset), 
-            es_elementset(oboset), by = "set") %>%
-            filter(is_a)
+    inner_join(es_set(oboset), es_elementset(oboset), by = "set")
 }
 
 #' @importFrom tidyr unnest
@@ -152,7 +137,7 @@ oboset_element_parents <- function(oboset) {
 oboset_element_ancestors <- function(oboset) {
     stopifnot(is(oboset, "OBOSet"))
     oboset %>%
-        filter_element(element %in% es_elementset(oboset)$element %>%
+        filter_element(element %in% es_elementset(oboset)$element) %>%
         .ancestors
 }
 
