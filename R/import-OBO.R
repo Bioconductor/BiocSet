@@ -118,7 +118,10 @@ setMethod("import", c("OBOFile", "ANY", "ANY"),
 }
 
 .set_elementset <- function(oboset) {
-    inner_join(es_set(oboset), es_elementset(oboset), by = "set")
+    is_a <- NULL
+    inner_join(es_set(oboset),
+        filter(es_elementset(oboset), is_a),
+        by = "set")
 }
 
 #' Functions to display relationships of an \code{OBOSet} object
@@ -203,7 +206,8 @@ oboset_set_ancestors <- function(oboset) {
     set <- NULL
     oboset %>%
         filter_set(set %in% es_elementset(oboset)$set) %>%
-        .ancestors
+        .ancestors %>%
+        rename(set = "element")
 }
 
 .ancestors_merge <-
