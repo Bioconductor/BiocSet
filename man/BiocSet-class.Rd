@@ -14,7 +14,7 @@
 \alias{BiocSet_from_elementset}
 \title{BiocSet class}
 \usage{
-BiocSet(..., active = c("elementset", "element", "set"))
+BiocSet(..., metadata = list(), active = c("elementset", "element", "set"))
 
 \S4method{show}{BiocSet}(object)
 
@@ -30,15 +30,17 @@ es_elementset(x)
 
 \S4method{es_elementset}{BiocSet}(x)
 
-BiocSet_from_elementset(elementset, element, set)
+BiocSet_from_elementset(elementset, element, set, metadata)
 }
 \arguments{
 \item{...}{Named character() vectors of element sets, or a named
-list of character() vectors.. Each character vector is an
-element set. The name of the character vectors are the name of
+list of character() vectors. Each character vector is an
+element set. The names of the character vectors are the names of
 the sets.}
 
-\item{active}{A character to indicate which tibble is active. The
+\item{metadata}{A list() with arbitrary content, describing the set.}
+
+\item{active}{A character(1) to indicate which tibble is active. The
 default is "elementset".}
 
 \item{object}{A \code{BiocSet} object.}
@@ -71,7 +73,9 @@ The \code{BiocSet} constructor, the show method, the
 
 \item{\code{elementset}}{The elementset tibble created from user input}
 
-\item{\code{active}}{Character, indicates which tibble is active}
+\item{\code{active}}{A character(1), indicates which tibble is active}
+
+\item{\code{metadata}}{A list() with arbitrary elements describing the set}
 }}
 
 \examples{

@@ -9,12 +9,16 @@ setOldClass(c("tbl_element", "tbl_set", "tbl_elementset"))
 #' @slot element The element tibble from `tbl_elementset`
 #' @slot set The set tibble from `tbl_elementset`
 #' @slot elementset The elementset tibble created from user input
-#' @slot active Character, indicates which tibble is active
+#' @slot active A character(1), indicates which tibble is active
+#' @slot metadata A list() with arbitrary elements describing the set
+#' @importClassesFrom S4Vectors Annotated
+#' @importFrom S4Vectors metadata "metadata<-"
 #' @exportClass BiocSet
 NULL
 
 .BiocSet <- setClass(
     "BiocSet",
+    contains = "Annotated",
     slots = c(
         element = "tbl_element",
         set = "tbl_set",
@@ -29,10 +33,11 @@ NULL
 #'     element set tibble rather than character vector(s).
 #' @rdname BiocSet-class
 #' @param ... Named character() vectors of element sets, or a named
-#'     list of character() vectors.. Each character vector is an
-#'     element set. The name of the character vectors are the name of
+#'     list of character() vectors. Each character vector is an
+#'     element set. The names of the character vectors are the names of
 #'     the sets.
-#' @param active A character to indicate which tibble is active. The
+#' @param metadata A list() with arbitrary content, describing the set.
+#' @param active A character(1) to indicate which tibble is active. The
 #'     default is "elementset".
 #' @return An S4 \code{BiocSet} object shown as a tripple tibble,
 #'     where each slot is a tibble.
@@ -41,7 +46,8 @@ NULL
 #' BiocSet(set1 = letters, set2 = LETTERS)
 #' lst <- list(set1 = letters, set2 = LETTERS)
 #' BiocSet(lst)
-BiocSet <- function(..., active = c("elementset", "element", "set"))
+BiocSet <-
+    function(..., metadata = list(), active = c("elementset", "element", "set"))
 {
     active <- match.arg(active)
     elementset <- .tbl_elementset(...)
@@ -49,9 +55,10 @@ BiocSet <- function(..., active = c("elementset", "element", "set"))
     set <- .tbl_set(elementset)
 
     .BiocSet(element = element,
-                set = set,
-                elementset = elementset,
-                active = active)
+             set = set,
+             elementset = elementset,
+             metadata = metadata,
+             active = active)
 }
 
 #' @rdname BiocSet-class
@@ -178,12 +185,16 @@ setMethod("es_elementset", "BiocSet", .elementset)
 #'        set = sample(LETTERS[1:2], 10, TRUE)
 #'    )
 #' BiocSet_from_elementset(elementset, element, set)
-BiocSet_from_elementset <- function(elementset, element, set)
+BiocSet_from_elementset <- function(elementset, element, set, metadata)
 {
+    if (missing(elementset))
+        elementset <- tibble(element = character(), set = character())
     if (missing(element))
         element <- tibble(element = character())
     if (missing(set))
         set <- tibble(set = character())
+    if (missing(metadata))
+        metadata <- list()
     stopifnot(
         "element" %in% names(elementset),
         is.character(elementset$element),
@@ -193,10 +204,16 @@ BiocSet_from_elementset <- function(elementset, element, set)
         "set" %in% names(set)
     )
 
-    es <- do.call(BiocSet, split(elementset$element, elementset$set))
-    es <- left_join_element(es, element)
-    es <- left_join_set(es, set)
-    es <- left_join_elementset(es, elementset)
+    es <- do.call(
+        BiocSet,
+        c(
+            split(elementset$element, elementset$set),
+            list(metadata = metadata)
+        )
+    )
+    es <- left_join_element(es, element, by = "element")
+    es <- left_join_set(es, set, by = "set")
+    es <- left_join_elementset(es, elementset, by = c("element", "set"))
 
     if (nrow(element) > nrow(es_element(es)))
         message("more elements in 'element' than in 'elementset'")

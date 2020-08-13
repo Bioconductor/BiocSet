@@ -5,19 +5,19 @@ download.file("http://current.geneontology.org/ontology/go.obo", "obo_file.obo")
 
 ## Then use the import function to read in the obo file and create an OBOSet 
 ## object which is an extension of the BiocSet class
-foo <- import("obo_file.obo")
+foo <- import("obo_file.obo", extract_tag = "everything")
 
 ## From here we created a list of ancestors to create a smaller obo file with 
 ## proper relationships
-tst_ann <- oboset_element_ancestors(foo) %>%
-    head() %>%
-    unnset("ancestors") %>%
+small_tst <- es_element(foo)[1,] %>%
+    unnest("ancestors") %>%
+    select("element", "ancestors") %>%
     unlist() %>%
     unique()
 
-tst_ann
+small_oboset <- foo %>% filter_elementset(element %in% small_tst)
 
-## A smaller obo file was created by searching for these terms in the original 
-## obo file
-## We also added in the parent term GO:0000002 so that the relationships would 
-## be complete
+## We demonstrate how to export to a temporary file but
+## we exported the OBOset to the sample_go.obo file in inst/extdata of BiocSet
+fl <- tempfile(fileext=".obo")
+export(small_oboset, fl)
