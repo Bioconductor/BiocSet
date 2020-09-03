@@ -1,9 +1,9 @@
-.GMTFile = setClass("GMTFile", contains = "RTLFile")
+.GMTFile = setClass("GMTFile", contains = "BiocFile")
 
 GMTFile = function(resource, ...)
     .GMTFile(resource = resource)
 
-#' @importFrom rtracklayer import export resource
+#' @importFrom BiocIO import export resource
 #' @importFrom methods new
 #' @importFrom utils write.table
 import.gmt <- function(path) {

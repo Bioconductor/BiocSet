@@ -1,4 +1,4 @@
-.OBOFile = setClass("OBOFile", contains = "RTLFile")
+.OBOFile = setClass("OBOFile", contains = "BiocFile")
 
 OBOFile = function(resource, ...)
     .OBOFile(resource = resource)
