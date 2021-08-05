@@ -11,6 +11,8 @@
 
     keys <- es_element(es)$element
     map <- mapIds(org, keys, to, from, multiVals = multi)
+    if (any(is(map) == "SimpleCharacterList"))
+        map <- as.vector(map)
     tbl <- enframe(map, name = from, value = to)
     es %>% map_element(tbl[[from]], tbl[[to]])
 }
