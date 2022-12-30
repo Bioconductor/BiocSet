@@ -1,3 +1,12 @@
+CHANGES IN VERSION 1.12
+----------------------
+
+BUG FIX
+
+    o (1.12.1) propagate metadata with map_*() functions; reexport
+    metadata(), metadata()<- generics and methods for public use
+    <https://github.com/Bioconductor/BiocSet/issues/6>
+
 CHANGES IN VERSION 1.3
 ----------------------
 

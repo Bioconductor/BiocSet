@@ -79,7 +79,7 @@ map_element.BiocSet <-
         summarise_all(list) %>%
         mutate_if(.test, unlist)
 
-    BiocSet_from_elementset(es, elements, sets)
+    BiocSet_from_elementset(es, elements, sets, metadata(.data))
 }
 
 #' Functions for mapping elements in the element tibble to different id types

@@ -1,6 +1,6 @@
 Package: BiocSet
 Title: Representing Different Biological Sets
-Version: 1.12.0
+Version: 1.12.1
 Authors@R: c(
     person("Kayla", "Morrell", email = "kayla.morrell@roswellpark.org",
         role = c("aut", "cre")),
@@ -40,6 +40,5 @@ Suggests:
 biocViews: GeneExpression, GO, KEGG, Software
 License: Artistic-2.0
 Encoding: UTF-8
-LazyData: false
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr

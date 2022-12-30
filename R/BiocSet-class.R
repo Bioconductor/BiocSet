@@ -12,7 +12,8 @@ setOldClass(c("tbl_element", "tbl_set", "tbl_elementset"))
 #' @slot active A character(1), indicates which tibble is active
 #' @slot metadata A list() with arbitrary elements describing the set
 #' @importClassesFrom S4Vectors Annotated
-#' @importFrom S4Vectors metadata "metadata<-"
+#' @importFrom S4Vectors metadata metadata<-
+#' @export metadata metadata<-
 #' @exportClass BiocSet
 NULL
 
