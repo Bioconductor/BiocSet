@@ -30,7 +30,7 @@ es_activate(.data, what)
 
 .tbl_nongroup_vars.BiocSet(x)
 
-\method{group_by}{BiocSet}(.data, ..., add = FALSE)
+\method{group_by}{BiocSet}(.data, ..., .add = FALSE)
 
 \method{left_join}{BiocSet}(x, y, by, copy, suffix, ...)
 
@@ -51,7 +51,7 @@ es_activate(.data, what)
 object. For \code{union} and \code{intersect} the first
 \code{BiocSet} object to perform the operations on.}
 
-\item{add}{logical, whether to add to the existing groups.}
+\item{.add}{logical, whether to add to the existing groups.}
 
 \item{y}{For \code{left_join}, a tibble to join. For \code{union} and 
 \code{intersect} the second \code{BiocSet} object used.}
