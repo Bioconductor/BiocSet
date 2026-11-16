@@ -120,15 +120,15 @@ arrange.BiocSet <- function(.data, ...)
 #' @rdname BiocSet-methods
 #' @description \code{group_by}: converts an existing tbl into a grouped tbl. 
 #' @importFrom dplyr group_by
-#' @param add logical, whether to add to the existing groups.
+#' @param .add logical, whether to add to the existing groups.
 #' @export
 #' @examples
 #' 
 #' es %>% group_by(element, set)
-group_by.BiocSet <- function(.data, ..., add = FALSE)
+group_by.BiocSet <- function(.data, ..., .add = FALSE)
 {
     sub <- .active_value(.data)
-    group_by(sub, ..., add = FALSE)
+    group_by(sub, ..., .add = .add)
 }
 
 #' @rdname BiocSet-methods
